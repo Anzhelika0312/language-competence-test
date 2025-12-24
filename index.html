@@ -152,8 +152,18 @@
     <div class="scorebar">
       <div>
         <div class="muted" style="color:#d1d5db;">Language Competence • Online Olympiad</div>
-        <!-- Removed live score to avoid showing progress -->
+
+        <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+          <input type="text" id="fullName" placeholder="Full name (ФИО)" style="width:280px; font-size:16px; padding:8px 10px; border-radius:10px; border:none;" />
+          <select id="status" style="font-size:16px; padding:8px 10px; border-radius:10px; border:none;">
+            <option value="">Select status</option>
+            <option value="student">student</option>
+            <option value="master’s student">magistrant</option>
+            <option value="teacher">teacher</option>
+          </select>
+        </div>
       </div>
+
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <button class="btn" id="btnFinish">Finish & Show Result</button>
         <button class="btn" id="btnReset">Reset</button>
@@ -368,7 +378,10 @@ Egyptologist Miroslav Verner writes, ‘Few monuments hold a place in human hist
   </div>
 
   <script>
-    // ===== Answer key (hidden from the user in practice, but still in the file) =====
+    // ===== CONFIG =====
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWRZuqhWsuv4ZRHn8wfu4id1tJgXKzncTCFq_R_0NKhwHSQ8PzTVrovQwRpFtyxdup/exec";
+
+    // ===== Answer key (keep inside JS) =====
     const key = {
       task1: { t1q1: "city", t1q2: "priests", t1q3: "trench", t1q4: "location" },
       task2: new Set(["B","D"]),
@@ -407,24 +420,61 @@ Egyptologist Miroslav Verner writes, ‘Few monuments hold a place in human hist
       return s1 + s2 + sP2 + sP3;
     }
 
-    // Enforce max 2 choices in Task 2 (without showing correctness)
+    // Enforce max 2 choices in Task 2
     const t2Boxes = Array.from(document.querySelectorAll('#task2 input[type="checkbox"]'));
     t2Boxes.forEach(box=>{
       box.addEventListener("change", (e)=>{
         const checked = t2Boxes.filter(b=>b.checked);
         if(checked.length > 2){
-          e.target.checked = false; // undo extra selection
+          e.target.checked = false;
           alert("You can select only TWO options in Task 2.");
         }
       });
     });
 
-    // Finish: show ONLY total score
-    document.getElementById("btnFinish").addEventListener("click", ()=>{
+    // Finish: show score + send to Google Sheets
+    document.getElementById("btnFinish").addEventListener("click", async ()=>{
+      const fullName = document.getElementById("fullName").value.trim();
+      const status = document.getElementById("status").value;
+
+      if(!fullName){
+        alert("Please enter your Full Name (ФИО).");
+        return;
+      }
+      if(!status){
+        alert("Please select your status (student / magistrant / teacher).");
+        return;
+      }
+
       const total = scoreAll();
+
+      // Show ONLY total score
       const finalLine = document.getElementById("finalLine");
       finalLine.style.display = "block";
       finalLine.textContent = `Final score: ${total} / 15`;
+
+      // Send result to Google Sheets
+      try{
+        const payload = {
+          fullName,
+          status,
+          score: total,
+          total: 15,
+          submittedAt: new Date().toISOString()
+        };
+
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        alert("✅ Your result has been sent!");
+      } catch(err){
+        console.error(err);
+        alert("❌ Error sending result. Please try again.");
+      }
+
       window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
     });
 
@@ -449,5 +499,6 @@ Egyptologist Miroslav Verner writes, ‘Few monuments hold a place in human hist
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   </script>
+
 </body>
 </html>
