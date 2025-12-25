@@ -454,7 +454,7 @@ Egyptologist Miroslav Verner writes, ‘Few monuments hold a place in human hist
       finalLine.textContent = `Final score: ${total} / 15`;
 
       // Send result to Google Sheets
-      try{
+      try {
         const payload = {
           fullName,
           status,
@@ -464,13 +464,13 @@ Egyptologist Miroslav Verner writes, ‘Few monuments hold a place in human hist
         };
 
         await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(payload)
         });
 
         alert("✅ Your result has been sent!");
-      } catch(err){
+      } catch(err) {
         console.error(err);
         alert("❌ Error sending result. Please try again.");
       }
