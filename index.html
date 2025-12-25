@@ -379,7 +379,7 @@ Egyptologist Miroslav Verner writes, ‘Few monuments hold a place in human hist
 
   <script>
     // ===== CONFIG =====
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3WsvMVGmXDoOE6vAsS-C_sezurDhPu03c7ek9Rnv7XS4Ept2yU2_FP4Vbu-bO7CRx/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8JHztKoKaOAQQruRRMHc8X_WfKMQovb41bdn9bnJhw1zjY7Rw5-YLNcEXlGEAPQmk/exec";
 
     // ===== Answer key (keep inside JS) =====
     const key = {
@@ -462,15 +462,18 @@ Egyptologist Miroslav Verner writes, ‘Few monuments hold a place in human hist
           total: 15,
           submittedAt: new Date().toISOString()
         };
-
+      
+        const formData = new FormData();
+        formData.append("data", JSON.stringify(payload));
+      
         await fetch(SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify(payload)
+          method: "POST",
+          mode: "no-cors",
+          body: formData
         });
-
+      
         alert("✅ Your result has been sent!");
-      } catch(err) {
+      } catch (err) {
         console.error(err);
         alert("❌ Error sending result. Please try again.");
       }
